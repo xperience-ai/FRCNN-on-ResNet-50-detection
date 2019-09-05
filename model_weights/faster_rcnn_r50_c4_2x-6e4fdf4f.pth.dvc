@@ -1,8 +1,8 @@
-wdir: ..
 outs:
-- path: model_weights/faster_rcnn_r50_c4_2x-6e4fdf4f.pth
-  metric: false
+- metric: false
   cache: true
-  md5: d47edb62dde4fbf959748293498af2a6
   persist: false
+  md5: d47edb62dde4fbf959748293498af2a6
+  path: model_weights/faster_rcnn_r50_c4_2x-6e4fdf4f.pth
 md5: 00bebd67b8c7b133cbaee9132762e834
+wdir: ..
