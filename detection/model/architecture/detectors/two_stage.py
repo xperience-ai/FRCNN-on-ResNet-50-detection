@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from mmdet.core import bbox2result, bbox2roi, build_assigner, build_sampler
+from ...utils.bbox import bbox2result, bbox2roi, build_assigner, build_sampler
 from ...utils import builder
 from ...utils.registry_objects import DETECTORS
 from .base import BaseDetector

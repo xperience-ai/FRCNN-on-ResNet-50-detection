@@ -2,9 +2,9 @@ from __future__ import division
 
 import torch
 import torch.nn as nn
-from mmdet import ops
-from mmdet.core import force_fp32
+from ...utils import ops
 
+from ...utils.fp16 import force_fp32
 from ...utils.registry_objects import ROI_EXTRACTORS
 
 
@@ -45,6 +45,7 @@ class SingleRoIExtractor(nn.Module):
     def build_roi_layers(self, layer_cfg, featmap_strides):
         cfg = layer_cfg.copy()
         layer_type = cfg.pop('type')
+        print(' -- layer_type = ', layer_type)
         assert hasattr(ops, layer_type)
         layer_cls = getattr(ops, layer_type)
         roi_layers = nn.ModuleList(
@@ -86,7 +87,7 @@ class SingleRoIExtractor(nn.Module):
         new_rois = torch.stack((rois[:, 0], x1, y1, x2, y2), dim=-1)
         return new_rois
 
-    @force_fp32(apply_to=('feats', ), out_fp16=True)
+    @force_fp32(apply_to=('feats',), out_fp16=True)
     def forward(self, feats, rois, roi_scale_factor=None):
         if len(feats) == 1:
             return self.roi_layers[0](feats[0], rois)

@@ -6,7 +6,9 @@ import numpy as np
 import pycocotools.mask as maskUtils
 import torch.nn as nn
 
-from mmdet.core import auto_fp16, get_classes, tensor2imgs
+from ...utils.class_names import get_classes
+from ...utils.fp16 import auto_fp16
+from ...utils.misc import tensor2imgs
 
 
 class BaseDetector(nn.Module):
@@ -80,7 +82,7 @@ class BaseDetector(nn.Module):
         else:
             return self.aug_test(imgs, img_metas, **kwargs)
 
-    @auto_fp16(apply_to=('img', ))
+    @auto_fp16(apply_to=('img',))
     def forward(self, img, img_meta, return_loss=True, **kwargs):
         if return_loss:
             return self.forward_train(img, img_meta, **kwargs)

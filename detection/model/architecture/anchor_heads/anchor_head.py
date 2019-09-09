@@ -4,10 +4,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 from mmcv.cnn import normal_init
-from mmdet.core import (AnchorGenerator, anchor_target, delta2bbox, force_fp32,
-                        multi_apply, multiclass_nms)
 
+from ...utils.anchor import AnchorGenerator, anchor_target
+from ...utils.bbox import delta2bbox
 from ...utils.builder import build_loss
+from ...utils.fp16 import force_fp32
+from ...utils.misc import multi_apply
+from ...utils.post_processing import multiclass_nms
 from ...utils.registry_objects import HEADS
 
 
