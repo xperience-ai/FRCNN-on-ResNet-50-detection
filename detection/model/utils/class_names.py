@@ -1,4 +1,4 @@
-import mmcv
+from .misc import is_str
 
 
 def imagenet_det_classes():
@@ -80,7 +80,7 @@ def get_classes(dataset):
         for alias in aliases:
             alias2name[alias] = name
 
-    if mmcv.is_str(dataset):
+    if is_str(dataset):
         if dataset in alias2name:
             labels = eval(alias2name[dataset] + '_classes()')
         else:

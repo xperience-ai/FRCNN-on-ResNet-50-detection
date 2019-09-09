@@ -45,7 +45,6 @@ class SingleRoIExtractor(nn.Module):
     def build_roi_layers(self, layer_cfg, featmap_strides):
         cfg = layer_cfg.copy()
         layer_type = cfg.pop('type')
-        print(' -- layer_type = ', layer_type)
         assert hasattr(ops, layer_type)
         layer_cls = getattr(ops, layer_type)
         roi_layers = nn.ModuleList(

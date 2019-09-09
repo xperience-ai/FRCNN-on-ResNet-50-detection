@@ -2,13 +2,14 @@ import io
 import warnings
 
 import dvc.api as dvcapi
-import mmcv
 import torch
-from mmcv.parallel import collate, scatter
 
 from detection.model.utils import Compose
 from detection.model.utils import build_detector
 from detection.model.utils import get_classes
+from ..utils.config import Config
+from ..utils.image import imread
+from ..utils.parallel import collate, scatter
 
 
 def init_detector(config, device='cuda:0'):
@@ -22,8 +23,8 @@ def init_detector(config, device='cuda:0'):
         nn.Module: The constructed detector.
     """
     if isinstance(config, str):
-        config = mmcv.Config.fromfile(config)
-    elif not isinstance(config, mmcv.Config):
+        config = Config.fromfile(config)
+    elif not isinstance(config, Config):
         raise TypeError('config must be a filename or Config object, '
                         'but got {}'.format(type(config)))
     config.model.pretrained = None
@@ -56,7 +57,7 @@ class LoadImage(object):
             results['filename'] = results['img']
         else:
             results['filename'] = None
-        img = mmcv.imread(results['img'])
+        img = imread(results['img'])
         results['img'] = img
         results['img_shape'] = img.shape
         results['ori_shape'] = img.shape

@@ -1,10 +1,10 @@
 from collections.abc import Sequence
 
-import mmcv
 import numpy as np
 import torch
-from mmcv.parallel import DataContainer as DC
 
+from ..utils.misc import is_str
+from ..utils.parallel import DataContainer as DC
 from ..utils.registry_objects import PIPELINES
 
 
@@ -18,7 +18,7 @@ def to_tensor(data):
         return data
     elif isinstance(data, np.ndarray):
         return torch.from_numpy(data)
-    elif isinstance(data, Sequence) and not mmcv.is_str(data):
+    elif isinstance(data, Sequence) and not is_str(data):
         return torch.tensor(data)
     elif isinstance(data, int):
         return torch.LongTensor([data])

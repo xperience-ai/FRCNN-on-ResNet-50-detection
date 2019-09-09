@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv.cnn import normal_init
+from ..cnn import normal_init
 from ...utils.ops import nms
 
 from .anchor_head import AnchorHead

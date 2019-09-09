@@ -1,7 +1,6 @@
-import mmcv
-
-from ..utils.registry_objects import PIPELINES
 from ..utils.compose import Compose
+from ..utils.misc import is_list_of
+from ..utils.registry_objects import PIPELINES
 
 
 @PIPELINES.register_module
@@ -11,7 +10,7 @@ class MultiScaleFlipAug(object):
         self.transforms = Compose(transforms)
         self.img_scale = img_scale if isinstance(img_scale,
                                                  list) else [img_scale]
-        assert mmcv.is_list_of(self.img_scale, tuple)
+        assert is_list_of(self.img_scale, tuple)
         self.flip = flip
 
     def __call__(self, results):

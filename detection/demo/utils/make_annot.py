@@ -1,7 +1,7 @@
 import glob
 
 import cv2
-import mmcv
+from ...model.utils import dump
 import numpy as np
 
 
@@ -46,10 +46,10 @@ def annot(images_path, label_dict, train_data=True):
                 else:
                     annotations_val.append(annot_instance)
     if train_data:
-        mmcv.dump(annotations_train, save_train_path)
+        dump(annotations_train, save_train_path)
         print('Annot train ready: {}, len {}'.format(save_train_path, len(annotations_train)))
     else:
-        mmcv.dump(annotations_val, save_val_path)
+        dump(annotations_val, save_val_path)
         print('Annot val ready: {}, len {}'.format(save_val_path, len(annotations_val)))
 
 

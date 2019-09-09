@@ -1,8 +1,9 @@
 import cv2
 import matplotlib.pyplot as plt
-import mmcv
 import numpy as np
 import pycocotools.mask as maskUtils
+
+from ...model.utils import (imread, imwrite, color_val, concat_list)
 
 
 def imshow_det_bboxes(img,
@@ -39,7 +40,7 @@ def imshow_det_bboxes(img,
     assert labels.ndim == 1
     assert bboxes.shape[0] == labels.shape[0]
     assert bboxes.shape[1] == 4 or bboxes.shape[1] == 5
-    img = mmcv.imread(img)
+    img = imread(img)
 
     if score_thr > 0:
         assert bboxes.shape[1] == 5
@@ -48,8 +49,8 @@ def imshow_det_bboxes(img,
         bboxes = bboxes[inds, :]
         labels = labels[inds]
 
-    bbox_color = mmcv.color_val(bbox_color)
-    text_color = mmcv.color_val(text_color)
+    bbox_color = color_val(bbox_color)
+    text_color = color_val(text_color)
 
     for bbox, label in zip(bboxes, labels):
         bbox_int = bbox.astype(np.int32)
@@ -94,7 +95,7 @@ def show_result(img,
             be written to the out file instead of shown in a window.
     """
     assert isinstance(class_names, (tuple, list))
-    img = mmcv.imread(img)
+    img = imread(img)
     if isinstance(result, tuple):
         bbox_result, segm_result = result
     else:
@@ -103,7 +104,7 @@ def show_result(img,
     # draw segmentation masks
     if show_mask and segm_result is not None:
         print(len(segm_result[0]))
-        segms = mmcv.concat_list(segm_result)
+        segms = concat_list(segm_result)
         inds = np.where(bboxes[:, -1] > score_thr)[0]
         for i in inds:
             color_mask = np.random.randint(0, 256, (1, 3), dtype=np.uint8)

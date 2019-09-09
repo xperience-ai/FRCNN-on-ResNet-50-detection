@@ -1,10 +1,7 @@
-import logging
-
 import torch.nn as nn
-from mmcv.cnn import constant_init, kaiming_init
-from mmcv.runner import load_checkpoint
 
 from ..backbones import ResNet, make_res_layer
+from ..cnn import constant_init, kaiming_init
 from ...utils.fp16 import auto_fp16
 from ...utils.registry_objects import SHARED_HEADS
 
@@ -46,17 +43,11 @@ class ResLayer(nn.Module):
         self.add_module('layer{}'.format(stage + 1), res_layer)
 
     def init_weights(self, pretrained=None):
-        if isinstance(pretrained, str):
-            logger = logging.getLogger()
-            load_checkpoint(self, pretrained, strict=False, logger=logger)
-        elif pretrained is None:
-            for m in self.modules():
-                if isinstance(m, nn.Conv2d):
-                    kaiming_init(m)
-                elif isinstance(m, nn.BatchNorm2d):
-                    constant_init(m, 1)
-        else:
-            raise TypeError('pretrained must be a str or None')
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                kaiming_init(m)
+            elif isinstance(m, nn.BatchNorm2d):
+                constant_init(m, 1)
 
     @auto_fp16()
     def forward(self, x):

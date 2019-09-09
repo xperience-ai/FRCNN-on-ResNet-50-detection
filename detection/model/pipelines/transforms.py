@@ -1,4 +1,5 @@
-import mmcv
+from ..utils.misc import is_list_of
+from ..utils.image.transforms import *
 import numpy as np
 
 from ..utils.registry_objects import PIPELINES
@@ -42,7 +43,7 @@ class Resize(object):
                 self.img_scale = img_scale
             else:
                 self.img_scale = [img_scale]
-            assert mmcv.is_list_of(self.img_scale, tuple)
+            assert is_list_of(self.img_scale, tuple)
 
         if ratio_range is not None:
             # mode 1: given a scale and a range of image ratio
@@ -57,14 +58,14 @@ class Resize(object):
 
     @staticmethod
     def random_select(img_scales):
-        assert mmcv.is_list_of(img_scales, tuple)
+        assert is_list_of(img_scales, tuple)
         scale_idx = np.random.randint(len(img_scales))
         img_scale = img_scales[scale_idx]
         return img_scale, scale_idx
 
     @staticmethod
     def random_sample(img_scales):
-        assert mmcv.is_list_of(img_scales, tuple) and len(img_scales) == 2
+        assert is_list_of(img_scales, tuple) and len(img_scales) == 2
         img_scale_long = [max(s) for s in img_scales]
         img_scale_short = [min(s) for s in img_scales]
         long_edge = np.random.randint(
@@ -103,10 +104,10 @@ class Resize(object):
 
     def _resize_img(self, results):
         if self.keep_ratio:
-            img, scale_factor = mmcv.imrescale(
+            img, scale_factor = imrescale(
                 results['img'], results['scale'], return_scale=True)
         else:
-            img, w_scale, h_scale = mmcv.imresize(
+            img, w_scale, h_scale = imresize(
                 results['img'], results['scale'], return_scale=True)
             scale_factor = np.array([w_scale, h_scale, w_scale, h_scale],
                                     dtype=np.float32)
@@ -130,14 +131,14 @@ class Resize(object):
                 continue
             if self.keep_ratio:
                 masks = [
-                    mmcv.imrescale(
+                    imrescale(
                         mask, results['scale_factor'], interpolation='nearest')
                     for mask in results[key]
                 ]
             else:
                 mask_size = (results['img_shape'][1], results['img_shape'][0])
                 masks = [
-                    mmcv.imresize(mask, mask_size, interpolation='nearest')
+                    imresize(mask, mask_size, interpolation='nearest')
                     for mask in results[key]
                 ]
             results[key] = masks
@@ -197,7 +198,7 @@ class RandomFlip(object):
             results['flip'] = flip
         if results['flip']:
             # flip image
-            results['img'] = mmcv.imflip(results['img'])
+            results['img'] = imflip(results['img'])
             # flip bboxes
             for key in results.get('bbox_fields', []):
                 results[key] = self.bbox_flip(results[key],
@@ -235,9 +236,9 @@ class Pad(object):
 
     def _pad_img(self, results):
         if self.size is not None:
-            padded_img = mmcv.impad(results['img'], self.size)
+            padded_img = impad(results['img'], self.size)
         elif self.size_divisor is not None:
-            padded_img = mmcv.impad_to_multiple(
+            padded_img = impad_to_multiple(
                 results['img'], self.size_divisor, pad_val=self.pad_val)
         results['img'] = padded_img
         results['pad_shape'] = padded_img.shape
@@ -248,7 +249,7 @@ class Pad(object):
         pad_shape = results['pad_shape'][:2]
         for key in results.get('mask_fields', []):
             padded_masks = [
-                mmcv.impad(mask, pad_shape, pad_val=self.pad_val)
+                impad(mask, pad_shape, pad_val=self.pad_val)
                 for mask in results[key]
             ]
             results[key] = np.stack(padded_masks, axis=0)
@@ -282,7 +283,7 @@ class Normalize(object):
         self.to_rgb = to_rgb
 
     def __call__(self, results):
-        results['img'] = mmcv.imnormalize(results['img'], self.mean, self.std,
+        results['img'] = imnormalize(results['img'], self.mean, self.std,
                                           self.to_rgb)
         results['img_norm_cfg'] = dict(
             mean=self.mean, std=self.std, to_rgb=self.to_rgb)

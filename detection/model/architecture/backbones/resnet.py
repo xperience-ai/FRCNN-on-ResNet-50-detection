@@ -1,15 +1,12 @@
-import logging
-
 import torch.nn as nn
 import torch.utils.checkpoint as cp
-from mmcv.cnn import constant_init, kaiming_init
-from mmcv.runner import load_checkpoint
 from torch.nn.modules.batchnorm import _BatchNorm
 
-from ...utils import GeneralizedAttention
+from ...architecture.cnn import constant_init, kaiming_init
 from ...utils import ContextBlock, DeformConv, ModulatedDeformConv
-from ...utils.registry_objects import BACKBONES
+from ...utils import GeneralizedAttention
 from ...utils import build_conv_layer, build_norm_layer
+from ...utils.registry_objects import BACKBONES
 
 
 class BasicBlock(nn.Module):
@@ -419,7 +416,7 @@ class ResNet(nn.Module):
             dilation = dilations[i]
             dcn = self.dcn if self.stage_with_dcn[i] else None
             gcb = self.gcb if self.stage_with_gcb[i] else None
-            planes = 64 * 2**i
+            planes = 64 * 2 ** i
             res_layer = make_res_layer(
                 self.block,
                 self.inplanes,
@@ -442,8 +439,8 @@ class ResNet(nn.Module):
 
         self._freeze_stages()
 
-        self.feat_dim = self.block.expansion * 64 * 2**(
-            len(self.stage_blocks) - 1)
+        self.feat_dim = self.block.expansion * 64 * 2 ** (
+                len(self.stage_blocks) - 1)
 
     @property
     def norm1(self):
@@ -477,30 +474,24 @@ class ResNet(nn.Module):
                 param.requires_grad = False
 
     def init_weights(self, pretrained=None):
-        if isinstance(pretrained, str):
-            logger = logging.getLogger()
-            load_checkpoint(self, pretrained, strict=False, logger=logger)
-        elif pretrained is None:
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                kaiming_init(m)
+            elif isinstance(m, (_BatchNorm, nn.GroupNorm)):
+                constant_init(m, 1)
+
+        if self.dcn is not None:
             for m in self.modules():
-                if isinstance(m, nn.Conv2d):
-                    kaiming_init(m)
-                elif isinstance(m, (_BatchNorm, nn.GroupNorm)):
-                    constant_init(m, 1)
+                if isinstance(m, Bottleneck) and hasattr(
+                        m, 'conv2_offset'):
+                    constant_init(m.conv2_offset, 0)
 
-            if self.dcn is not None:
-                for m in self.modules():
-                    if isinstance(m, Bottleneck) and hasattr(
-                            m, 'conv2_offset'):
-                        constant_init(m.conv2_offset, 0)
-
-            if self.zero_init_residual:
-                for m in self.modules():
-                    if isinstance(m, Bottleneck):
-                        constant_init(m.norm3, 0)
-                    elif isinstance(m, BasicBlock):
-                        constant_init(m.norm2, 0)
-        else:
-            raise TypeError('pretrained must be a str or None')
+        if self.zero_init_residual:
+            for m in self.modules():
+                if isinstance(m, Bottleneck):
+                    constant_init(m.norm3, 0)
+                elif isinstance(m, BasicBlock):
+                    constant_init(m.norm2, 0)
 
     def forward(self, x):
         x = self.conv1(x)
