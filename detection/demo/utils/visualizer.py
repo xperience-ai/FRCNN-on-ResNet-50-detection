@@ -51,6 +51,7 @@ def imshow_det_bboxes(img,
 
     bbox_color = color_val(bbox_color)
     text_color = color_val(text_color)
+    class_names_ = []
 
     for bbox, label in zip(bboxes, labels):
         bbox_int = bbox.astype(np.int32)
@@ -58,8 +59,8 @@ def imshow_det_bboxes(img,
         right_bottom = (bbox_int[2], bbox_int[3])
         cv2.rectangle(
             img, left_top, right_bottom, bbox_color, thickness=thickness)
-        label_text = class_names[
-            label] if class_names is not None else 'cls {}'.format(label)
+        label_text = class_names[label] if class_names is not None else 'cls {}'.format(label)
+        class_names_.append(label_text)
         if len(bbox) > 4:
             label_text += '|{:.02f}'.format(bbox[-1])
         cv2.putText(img, label_text, (bbox_int[0], bbox_int[1] - 2),
@@ -72,6 +73,7 @@ def imshow_det_bboxes(img,
         plt.show()
     if out_file is not None:
         imwrite(img, out_file)
+    return class_names_
 
 
 def show_result(img,
@@ -116,7 +118,7 @@ def show_result(img,
         for i, bbox in enumerate(bbox_result)
     ]
     labels = np.concatenate(labels)
-    imshow_det_bboxes(
+    return imshow_det_bboxes(
         img.copy(),
         bboxes,
         labels,
