@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pycocotools.mask as maskUtils
 
-from ...model.utils import (imread, imwrite, color_val, concat_list)
+from ...model.utils import (imread, color_val, concat_list)
 
 
-def imshow_det_bboxes(img,
+def show_preprocessor(img,
                       bboxes,
                       labels,
                       class_names=None,
@@ -15,10 +15,8 @@ def imshow_det_bboxes(img,
                       text_color='green',
                       thickness=2,
                       font_scale=2,
-                      show=True,
                       win_name='',
-                      wait_time=0,
-                      out_file=None):
+                      wait_time=0):
     """Draw bboxes and class labels (with scores) on an image.
     Args:
         img (str or ndarray): The image to be displayed.
@@ -52,6 +50,7 @@ def imshow_det_bboxes(img,
     bbox_color = color_val(bbox_color)
     text_color = color_val(text_color)
     class_names_ = []
+    scores = []
 
     for bbox, label in zip(bboxes, labels):
         bbox_int = bbox.astype(np.int32)
@@ -62,18 +61,12 @@ def imshow_det_bboxes(img,
         label_text = class_names[label] if class_names is not None else 'cls {}'.format(label)
         class_names_.append(label_text)
         if len(bbox) > 4:
+            scores.append(bbox[-1])
             label_text += '|{:.02f}'.format(bbox[-1])
         cv2.putText(img, label_text, (bbox_int[0], bbox_int[1] - 2),
                     cv2.FONT_HERSHEY_COMPLEX, font_scale, text_color, thickness)
 
-    if show:
-        plt.figure(figsize=(20, 20))
-        plt.axis('off')
-        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        plt.show()
-    if out_file is not None:
-        imwrite(img, out_file)
-    return class_names_
+    return cv2, img, class_names_, scores
 
 
 def show_result(img,
@@ -81,10 +74,10 @@ def show_result(img,
                 class_names,
                 score_thr=0.7,
                 wait_time=0,
-                out_file=None,
                 font_scale=2,
                 thickness=8,
-                show_mask=True):
+                show_mask=True,
+                show=True):
     """Visualize the detection results on the image.
     Args:
         img (str or np.ndarray): Image filename or loaded image.
@@ -118,14 +111,20 @@ def show_result(img,
         for i, bbox in enumerate(bbox_result)
     ]
     labels = np.concatenate(labels)
-    return imshow_det_bboxes(
+    cv2, img, class_names_, scores = show_preprocessor(
         img.copy(),
         bboxes,
         labels,
         class_names=class_names,
         score_thr=score_thr,
-        show=out_file is None,
         wait_time=wait_time,
-        out_file=out_file,
         font_scale=font_scale,
         thickness=thickness)
+
+    if show:
+        plt.figure(figsize=(20, 20))
+        plt.axis('off')
+        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        plt.show()
+
+    return class_names_, scores
