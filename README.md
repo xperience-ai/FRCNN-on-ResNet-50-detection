@@ -10,5 +10,5 @@ python3 inference.py --path_img data/croco.jpg
 ```
 * Run unit tests (described in <tt>utest_inference.py</tt>) to test classifier results in the following way:
 ```
-python3 -m unittest test.utest_inference -v
+python3 -m unittest tests.utest_inference -v
 ```
